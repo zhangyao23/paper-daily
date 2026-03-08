@@ -3,13 +3,27 @@ from __future__ import annotations
 from pathlib import Path
 
 from textual.app import App
+from textual.theme import Theme
 
 from paper_daily import config
+
+_THEME = Theme(
+    name="paper-daily",
+    primary="#00acc1",
+    secondary="#006064",
+    accent="#00bcd4",
+    dark=True,
+)
 
 
 class PaperDailyApp(App):
     CSS_PATH = "app.tcss"
     TITLE = "paper-daily"
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.register_theme(_THEME)
+        self.theme = "paper-daily"
 
     def on_mount(self) -> None:
         if not config.exists():

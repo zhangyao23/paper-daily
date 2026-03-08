@@ -7,7 +7,7 @@ from textual.widgets import Static
 
 from paper_daily import __version__
 
-_ICON_STYLE = "bright_red"
+_ICON_STYLE = "#00bcd4"
 
 
 class Banner(Container):
@@ -53,12 +53,13 @@ class Banner(Container):
     def _build_left() -> Text:
         c = _ICON_STYLE
         text = Text()
-        text.append(" \u2588\u2588\u2584  \u2584\u2588\u2588\n", style=c)
-        text.append("   \u2580\u2588\u2588\u2580", style=c)
-        text.append("    Arxiv Daily\n", style="bold cyan")
-        text.append("   \u2584\u2588\u2588\u2584", style=c)
-        text.append(f"    v{__version__}\n", style="dim")
-        text.append(" \u2588\u2588\u2580  \u2580\u2588\u2588", style=c)
+        text.append(" \u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n", style=c)
+        text.append(" \u2551 \u2580\u2580\u2580\u2580\u2580 \u2551\n", style=c)
+        text.append(" \u2551 \u2500\u2500\u2500\u2500\u2500 \u2551", style=c)
+        text.append("   Paper Daily\n", style=f"bold {c}")
+        text.append(" \u2551 \u2500\u2500\u2500\u2500\u2500 \u2551", style=c)
+        text.append(f"   v{__version__}\n", style="dim")
+        text.append(" \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d", style=c)
         return text
 
     def update_right(self, content: str | Text) -> None:
