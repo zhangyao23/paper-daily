@@ -1,0 +1,106 @@
+Screen {
+    layout: vertical;
+}
+
+OptionList {
+    height: auto;
+    max-height: 60%;
+    margin: 0 2;
+    border: none;
+    background: transparent;
+}
+
+OptionList:focus > .option-list--option-highlighted {
+    background: $accent 30%;
+    color: $text;
+    text-style: bold;
+}
+
+#keyword-list:focus > .option-list--option-highlighted {
+    text-style: none;
+}
+
+Footer {
+    dock: bottom;
+}
+
+.section-label {
+    padding: 1 2;
+    text-style: bold;
+    color: $text;
+}
+
+.step-label {
+    padding: 0 2;
+    color: $accent;
+}
+
+.hint {
+    padding: 0 2;
+    color: $text-muted;
+}
+
+.error-msg {
+    padding: 1 2;
+    color: $error;
+}
+
+#hint-bar {
+    dock: bottom;
+    width: 100%;
+    height: auto;
+    padding: 0 1;
+    background: $panel;
+}
+
+#keyword-view {
+    height: 1fr;
+}
+
+SettingsPanel {
+    height: 1fr;
+}
+
+#config-input {
+    display: none;
+    margin: 1 2;
+}
+
+#custom-input {
+    display: none;
+    margin: 1 2;
+}
+
+#welcome-text {
+    padding: 1 2;
+    color: $accent;
+    text-style: bold;
+}
+
+.config-section-label {
+    padding: 1 2 0 2;
+    color: $accent;
+    text-style: bold;
+}
+
+.config-value {
+    padding: 0 2;
+    color: $text-muted;
+}
+
+.calendar-container {
+    padding: 1 2;
+}
+
+.result-card {
+    padding: 0 2 1 2;
+}
+
+VerticalScroll {
+    height: 1fr;
+}
+
+#running-container {
+    height: 1fr;
+    padding: 1 2;
+}

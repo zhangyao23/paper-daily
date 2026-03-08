@@ -1,0 +1,24 @@
+[project]
+name = "paper-daily"
+version = "0.1.0"
+description = "Your daily arxiv digest, powered by LLM."
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "textual>=0.80.0",
+    "openai>=1.0.0",
+    "httpx>=0.27.0",
+    "tomli-w>=1.0.0",
+]
+
+[project.scripts]
+paper-daily = "paper_daily.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/paper_daily"]
