@@ -68,7 +68,7 @@ DEFAULTS = {
         "model": PROVIDERS["openai"]["default_model"],
     },
     "feed": {
-        "time_window": 24,
+        "time_window": 2,
         "top_n": 10,
         "output_style": "compact",
         "show_abstract": False,

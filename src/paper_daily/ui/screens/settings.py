@@ -34,8 +34,8 @@ CONFIG_ITEMS = [
     {
         "key": ("feed", "time_window"),
         "label": "Time Window",
-        "values": [24, 48, 72],
-        "display": lambda v: f"{v} hours",
+        "values": [1, 2, 3],
+        "display": lambda v: f"Last {v} day{'s' if v != 1 else ''}",
     },
     {
         "key": ("feed", "output_style"),

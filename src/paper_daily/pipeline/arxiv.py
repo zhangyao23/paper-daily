@@ -4,6 +4,7 @@ import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 import httpx
 
@@ -12,11 +13,23 @@ _ARXIV_API = "https://export.arxiv.org/api/query"
 _NS = {"atom": "http://www.w3.org/2005/Atom"}
 _RATE_LIMIT_SECONDS = 3.0
 _MAX_RESULTS_PER_QUERY = 200
+_ET = ZoneInfo("America/New_York")
 
 
-def search(keywords: list[str], time_window_hours: int = 24) -> list[dict]:
+def _business_days_ago(days: int) -> datetime:
+    now_et = datetime.now(_ET)
+    target = now_et.replace(hour=0, minute=0, second=0, microsecond=0)
+    remaining = days
+    while remaining > 0:
+        target -= timedelta(days=1)
+        if target.weekday() < 5:
+            remaining -= 1
+    return target
+
+
+def search(keywords: list[str], time_window_days: int = 1) -> list[dict]:
     query = _build_query(keywords)
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=time_window_hours)
+    cutoff = _business_days_ago(time_window_days).astimezone(timezone.utc)
 
     papers: list[dict] = []
     start = 0

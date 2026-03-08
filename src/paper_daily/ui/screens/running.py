@@ -68,8 +68,8 @@ class RunningScreen(Screen):
         pct = int(100 * current / total)
         text = Text()
         text.append("  ")
-        text.append("#" * filled, style="green")
-        text.append("-" * (width - filled), style="dim")
+        text.append("\u2501" * filled, style="green")
+        text.append("\u2501" * (width - filled), style="dim")
         text.append(f"  {pct}%", style="cyan")
         self.query_one("#progress-bar", Static).update(text)
 
@@ -87,7 +87,7 @@ class RunningScreen(Screen):
         feed = self.cfg.get("feed", {})
         api_base = llm.get("api_base", "")
         model = llm.get("model", "")
-        time_window = feed.get("time_window", 24)
+        time_window = feed.get("time_window", 2)
         top_n = feed.get("top_n", 10)
         detailed = feed.get("output_style", "compact") == "detailed"
 
@@ -96,11 +96,12 @@ class RunningScreen(Screen):
                 self._set_step, 1, "active", f"{len(self.keywords)} keywords"
             )
             papers = arxiv.search(self.keywords, time_window)
+            day_label = f"{time_window} day{'s' if time_window != 1 else ''}"
             self.app.call_from_thread(
                 self._set_step,
                 1,
                 "done",
-                f"found {len(papers)} papers in the last {time_window}h",
+                f"found {len(papers)} papers (last {day_label})",
             )
 
             if not papers:
@@ -146,6 +147,7 @@ class RunningScreen(Screen):
             self.app.call_from_thread(
                 self._set_step, 3, "active", f"0/{summary_total}"
             )
+            self.app.call_from_thread(self._set_progress, 0, summary_total)
             summarized = summarizer.summarize_papers(
                 top_papers,
                 api_base,

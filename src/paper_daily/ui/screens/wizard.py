@@ -47,9 +47,9 @@ class WizardScreen(Screen):
 
             with Container(id="step-3"):
                 yield OptionList(
-                    Option("Last 24 hours", id="24"),
-                    Option("Last 48 hours", id="48"),
-                    Option("Last 72 hours", id="72"),
+                    Option("Last 1 day", id="1"),
+                    Option("Last 2 days", id="2"),
+                    Option("Last 3 days", id="3"),
                     id="time-window-select",
                 )
 
@@ -169,7 +169,7 @@ class WizardScreen(Screen):
                 ),
             },
             "feed": {
-                "time_window": self.values.get("time_window", 24),
+                "time_window": self.values.get("time_window", 2),
                 "top_n": 10,
                 "output_style": self.values.get("output_style", "compact"),
                 "show_abstract": self.values.get("show_abstract", False),
