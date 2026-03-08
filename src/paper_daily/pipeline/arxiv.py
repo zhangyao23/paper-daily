@@ -13,6 +13,7 @@ _ARXIV_API = "https://export.arxiv.org/api/query"
 _NS = {"atom": "http://www.w3.org/2005/Atom"}
 _RATE_LIMIT_SECONDS = 3.0
 _MAX_RESULTS_PER_QUERY = 200
+_MAX_RECALL = 50
 _ET = ZoneInfo("America/New_York")
 
 
@@ -73,7 +74,13 @@ def search(keywords: list[str], time_window_days: int = 1) -> list[dict]:
         if p["arxiv_id"] not in seen:
             seen.add(p["arxiv_id"])
             unique.append(p)
-    return unique
+
+    unique.sort(key=lambda p: (-_pub_ts(p), p["title"]))
+    return unique[:_MAX_RECALL]
+
+
+def _pub_ts(paper: dict) -> float:
+    return datetime.fromisoformat(paper["published"]).timestamp()
 
 
 def _build_query(keywords: list[str]) -> str:
