@@ -11,21 +11,21 @@ from textual.widgets import Footer, Static
 from paper_daily.ui.widgets import Banner
 
 
-class RunningScreen(Screen):
+class ReportRunningScreen(Screen):
     BINDINGS = [
         Binding("escape", "cancel", "Cancel"),
     ]
 
-    def __init__(self, cfg: dict, keywords: list[str]) -> None:
+    def __init__(self, cfg: dict, papers: list[dict]) -> None:
         super().__init__()
         self.cfg = cfg
-        self.keywords = keywords
+        self.papers = papers
 
     def compose(self) -> ComposeResult:
         yield Banner()
-        with Container(id="running-container"):
+        with Container(id="report-container"):
             yield Static(
-                f"  Fetching papers for: {', '.join(self.keywords)}",
+                "  Generating report for current results",
                 classes="section-label",
             )
             yield Static("", id="step-1")
@@ -36,13 +36,13 @@ class RunningScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
-        self._run_pipeline()
+        self._run_report()
 
     def _set_step(self, step: int, state: str, detail: str) -> None:
         labels = {
-            1: "Searching arxiv",
-            2: "Scoring relevance",
-            3: "Summarizing papers",
+            1: "Downloading PDFs",
+            2: "Deep reviewing",
+            3: "Formatting to Markdown",
         }
         label = labels.get(step, "")
         text = Text()
@@ -74,9 +74,13 @@ class RunningScreen(Screen):
         self.query_one("#progress-bar", Static).update(text)
 
     @work(thread=True)
-    def _run_pipeline(self) -> None:
+    def _run_report(self) -> None:
         from paper_daily.config import resolve_api_key
-        from paper_daily.pipeline import arxiv, scorer, summarizer
+        from paper_daily.pipeline import (
+            deep_reviewer,
+            formatter as formatter_mod,
+            pdf_fetcher,
+        )
 
         api_key = resolve_api_key(self.cfg)
         if not api_key:
@@ -90,9 +94,8 @@ class RunningScreen(Screen):
         feed = self.cfg.get("feed", {})
         api_base = llm_cfg.get("api_base", "")
         model = llm_cfg.get("model", "")
-        time_window = feed.get("time_window", 2)
-        top_n = feed.get("top_n", 10)
-        detailed = feed.get("output_style", "compact") == "detailed"
+        deep_top_n = feed.get("deep_top_n", 3)
+        to_deep = self.papers[:deep_top_n]
 
         self.app.call_from_thread(self._set_step, 1, "pending", "")
         self.app.call_from_thread(self._set_step, 2, "pending", "")
@@ -100,80 +103,63 @@ class RunningScreen(Screen):
 
         try:
             self.app.call_from_thread(
-                self._set_step, 1, "active", f"{len(self.keywords)} keywords"
+                self._set_step, 1, "active", f"0/{len(to_deep)}"
             )
-            papers = arxiv.search(self.keywords, time_window)
-            day_label = f"{time_window} day{'s' if time_window != 1 else ''}"
-            self.app.call_from_thread(
-                self._set_step, 1, "done",
-                f"found {len(papers)} papers (last {day_label})",
-            )
-
-            if not papers:
+            full_texts = []
+            for i, paper in enumerate(to_deep):
                 self.app.call_from_thread(
-                    self._show_error, "No papers found for these keywords."
+                    self._set_step, 1, "active", f"{i + 1}/{len(to_deep)}"
                 )
-                return
+                pdf_path = pdf_fetcher.download_pdf(paper["arxiv_id"])
+                if pdf_path:
+                    full_texts.append(pdf_fetcher.extract_text(pdf_path))
+                else:
+                    full_texts.append(paper.get("abstract", ""))
+            self.app.call_from_thread(
+                self._set_step, 1, "done", f"{len(full_texts)} papers"
+            )
 
-            total = len(papers)
-
-            def on_score_progress(done: int, batch_total: int) -> None:
+            def on_review_progress(done: int, rev_total: int) -> None:
                 self.app.call_from_thread(
-                    self._set_step, 2, "active", f"{done}/{total}"
+                    self._set_step, 2, "active", f"{done}/{rev_total}"
                 )
-                self.app.call_from_thread(self._set_progress, done, total)
+                self.app.call_from_thread(
+                    self._set_progress, done, rev_total
+                )
 
             self.app.call_from_thread(
-                self._set_step, 2, "active", f"0/{total}"
+                self._set_step, 2, "active", f"0/{len(to_deep)}"
             )
-            top_papers = scorer.score_papers(
-                papers,
-                self.keywords,
+            reviewed = deep_reviewer.review_papers(
+                to_deep,
+                full_texts,
                 api_base,
                 api_key,
                 model,
-                top_n=top_n,
-                on_progress=on_score_progress,
+                on_progress=on_review_progress,
             )
             self.app.call_from_thread(
-                self._set_step, 2, "done", f"top {len(top_papers)} selected"
+                self._set_step, 2, "done", f"{len(reviewed)} reviewed"
             )
-
-            summary_total = len(top_papers)
-
-            def on_summary_progress(done: int, _total: int) -> None:
-                self.app.call_from_thread(
-                    self._set_step, 3, "active", f"{done}/{summary_total}"
-                )
-                self.app.call_from_thread(
-                    self._set_progress, done, summary_total
-                )
 
             self.app.call_from_thread(
-                self._set_step, 3, "active", f"0/{summary_total}"
+                self._set_step, 3, "active", ""
             )
-            self.app.call_from_thread(self._set_progress, 0, summary_total)
-            summarized = summarizer.summarize_papers(
-                top_papers,
-                api_base,
-                api_key,
-                model,
-                detailed=detailed,
-                on_progress=on_summary_progress,
+            markdown_content = formatter_mod.format_to_markdown(
+                reviewed, api_base, api_key, model
             )
+            import pyperclip
+            pyperclip.copy(markdown_content)
             self.app.call_from_thread(
-                self._set_step, 3, "done", "complete"
+                self._set_step, 3, "done", "Copied to clipboard"
             )
 
-            from paper_daily.core.calendar import record_session
-            from paper_daily.config import HISTORY_FILE
-            record_session(HISTORY_FILE)
-
-            self.app.call_from_thread(self.dismiss, summarized)
+            self.app.call_from_thread(self.dismiss, "clipboard")
         except Exception as exc:
             self.app.call_from_thread(
-                self._show_error, f"Pipeline failed: {exc}"
+                self._show_error, f"Report failed: {exc}"
             )
+            self.app.call_from_thread(self.dismiss, None)
 
     def _show_error(self, msg: str) -> None:
         self.query_one("#error-msg", Static).update(

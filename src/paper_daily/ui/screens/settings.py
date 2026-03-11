@@ -53,6 +53,11 @@ CONFIG_ITEMS = [
         "label": "Top N",
         "values": [5, 10, 15, 20],
     },
+    {
+        "key": ("feed", "deep_top_n"),
+        "label": "Report Top N",
+        "values": [2, 3, 5],
+    },
 ]
 
 

@@ -15,29 +15,29 @@ PROVIDERS = {
     "openai": {
         "api_base": "https://api.openai.com/v1",
         "env_key": "OPENAI_API_KEY",
-        "models": ["gpt-5-mini", "gpt-5.4", "gpt-5.4-pro"],
-        "default_model": "gpt-5-mini",
+        "models": ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo"],
+        "default_model": "gpt-4o-mini",
     },
     "gemini": {
         "api_base": "https://generativelanguage.googleapis.com/v1beta/openai",
         "env_key": "GEMINI_API_KEY",
         "models": [
-            "gemini-3.1-flash-lite-preview",
-            "gemini-3.1-pro-preview",
-            "gemini-3-flash-preview",
+            "gemini-2.0-flash-lite",
+            "gemini-2.0-flash",
+            "gemini-1.5-pro",
         ],
-        "default_model": "gemini-3.1-flash-lite-preview",
+        "default_model": "gemini-2.0-flash-lite",
     },
     "openrouter": {
         "api_base": "https://openrouter.ai/api/v1",
         "env_key": "OPENROUTER_API_KEY",
         "models": [
-            "openai/gpt-5-mini",
-            "google/gemini-3.1-flash-lite-preview",
-            "anthropic/claude-sonnet-4-6",
-            "anthropic/claude-haiku-4-5",
+            "openai/gpt-4o-mini",
+            "google/gemini-2.0-flash-lite",
+            "anthropic/claude-3-5-sonnet",
+            "anthropic/claude-3-haiku",
         ],
-        "default_model": "openai/gpt-5-mini",
+        "default_model": "openai/gpt-4o-mini",
     },
 }
 
@@ -72,6 +72,9 @@ DEFAULTS = {
         "top_n": 10,
         "output_style": "compact",
         "show_abstract": False,
+        "mode": "lite",
+        "deep_top_n": 3,
+        "digest_path": "",
     },
     "keywords": {
         "presets": dict(DEFAULT_PRESETS),
@@ -83,6 +86,13 @@ def load() -> dict:
     data = config_store.load(CONFIG_FILE)
     if not data:
         return copy.deepcopy(DEFAULTS)
+    for section, default_section in DEFAULTS.items():
+        if section not in data:
+            data[section] = copy.deepcopy(default_section)
+        else:
+            for key, default_val in default_section.items():
+                if key not in data[section]:
+                    data[section][key] = copy.deepcopy(default_val)
     return data
 
 
@@ -98,3 +108,14 @@ def resolve_api_key(cfg: dict) -> str:
     provider = cfg.get("llm", {}).get("provider", "openai")
     env_var = PROVIDERS.get(provider, {}).get("env_key", "")
     return os.environ.get(env_var, "") or cfg.get("llm", {}).get("api_key", "")
+
+
+def resolve_digest_path(cfg: dict) -> Path:
+    from datetime import date
+
+    path = cfg.get("feed", {}).get("digest_path", "")
+    if path:
+        return Path(path)
+    report_dir = Path.cwd() / "report"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    return report_dir / f"digest-{date.today().isoformat()}.md"

@@ -16,6 +16,8 @@ class ResultsScreen(Screen):
     BINDINGS = [
         Binding("escape", "back", "Back", priority=True),
         Binding("enter", "back", "Back"),
+        Binding("c", "copy_results", "Copy", priority=True),
+        Binding("d", "generate_report", "Report", priority=True),
         Binding("q", "quit_app", "Quit", priority=True),
     ]
 
@@ -32,6 +34,7 @@ class ResultsScreen(Screen):
                 yield Static(
                     self._render_paper(i, paper), classes="result-card"
                 )
+            yield Static("", id="report-status")
         yield Footer()
 
     def _render_paper(self, index: int, paper: dict) -> Text:
@@ -88,6 +91,40 @@ class ResultsScreen(Screen):
 
     def action_back(self) -> None:
         self.dismiss(None)
+
+    def action_copy_results(self) -> None:
+        import pyperclip
+
+        lines = [f"Paper Daily -- {date.today().isoformat()}\n"]
+        for i, paper in enumerate(self.papers):
+            lines.append(f"#{i + 1} [{paper.get('score', 0):.2f}] {paper.get('title', '')}")
+            authors = paper.get("authors", [])
+            if authors:
+                author_str = f"{authors[0]} et al." if len(authors) > 3 else ", ".join(authors)
+                lines.append(f"  Authors: {author_str}")
+            summary = paper.get("summary", "")
+            if summary:
+                lines.append(f"  {summary}")
+            url = paper.get("url", "")
+            if url:
+                lines.append(f"  {url}")
+            lines.append("")
+        pyperclip.copy("\n".join(lines))
+        status = self.query_one("#report-status", Static)
+        status.update("\n  Results copied to clipboard. Paste with Ctrl+V.")
+
+    def action_generate_report(self) -> None:
+        from paper_daily.ui.screens.report_running import ReportRunningScreen
+
+        def on_done(result: str | None) -> None:
+            if result:
+                status = self.query_one("#report-status", Static)
+                status.update("\n  Report copied to clipboard. Paste with Ctrl+V.")
+
+        self.app.push_screen(
+            ReportRunningScreen(self.cfg, self.papers),
+            callback=on_done,
+        )
 
     def action_quit_app(self) -> None:
         self.app.exit()
