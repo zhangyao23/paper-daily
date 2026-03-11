@@ -15,29 +15,29 @@ PROVIDERS = {
     "openai": {
         "api_base": "https://api.openai.com/v1",
         "env_key": "OPENAI_API_KEY",
-        "models": ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo"],
-        "default_model": "gpt-4o-mini",
+        "models": ["gpt-5-mini", "gpt-5.4", "gpt-5.4-pro"],
+        "default_model": "gpt-5-mini",
     },
     "gemini": {
         "api_base": "https://generativelanguage.googleapis.com/v1beta/openai",
         "env_key": "GEMINI_API_KEY",
         "models": [
-            "gemini-2.0-flash-lite",
-            "gemini-2.0-flash",
-            "gemini-1.5-pro",
+            "gemini-3.1-flash-lite-preview",
+            "gemini-3.1-pro-preview",
+            "gemini-3-flash-preview",
         ],
-        "default_model": "gemini-2.0-flash-lite",
+        "default_model": "gemini-3.1-flash-lite-preview",
     },
     "openrouter": {
         "api_base": "https://openrouter.ai/api/v1",
         "env_key": "OPENROUTER_API_KEY",
         "models": [
-            "openai/gpt-4o-mini",
-            "google/gemini-2.0-flash-lite",
-            "anthropic/claude-3-5-sonnet",
-            "anthropic/claude-3-haiku",
+            "openai/gpt-5-mini",
+            "google/gemini-3.1-flash-lite-preview",
+            "anthropic/claude-sonnet-4-6",
+            "anthropic/claude-haiku-4-5",
         ],
-        "default_model": "openai/gpt-4o-mini",
+        "default_model": "openai/gpt-5-mini",
     },
 }
 
