@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from textual.app import App
 from textual.theme import Theme
 
@@ -20,13 +18,17 @@ class PaperDailyApp(App):
     CSS_PATH = "app.tcss"
     TITLE = "paper-daily"
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, library_only: bool = False, **kwargs) -> None:
         super().__init__(**kwargs)
+        self.library_only = library_only
         self.register_theme(_THEME)
         self.theme = "paper-daily"
 
     def on_mount(self) -> None:
-        if not config.exists():
+        if self.library_only:
+            from paper_daily.ui.screens.library import LibraryScreen
+            self.push_screen(LibraryScreen(), callback=lambda _: self.exit())
+        elif not config.exists():
             from paper_daily.ui.screens.wizard import WizardScreen
 
             self.push_screen(WizardScreen(), callback=self._on_wizard_done)

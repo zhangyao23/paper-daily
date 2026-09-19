@@ -79,7 +79,7 @@ class ReportRunningScreen(Screen):
         from paper_daily.pipeline import (
             deep_reviewer,
             formatter as formatter_mod,
-            pdf_fetcher,
+            evidence,
         )
 
         api_key = resolve_api_key(self.cfg)
@@ -106,15 +106,14 @@ class ReportRunningScreen(Screen):
                 self._set_step, 1, "active", f"0/{len(to_deep)}"
             )
             full_texts = []
+            prepared = []
             for i, paper in enumerate(to_deep):
                 self.app.call_from_thread(
                     self._set_step, 1, "active", f"{i + 1}/{len(to_deep)}"
                 )
-                pdf_path = pdf_fetcher.download_pdf(paper["arxiv_id"])
-                if pdf_path:
-                    full_texts.append(pdf_fetcher.extract_text(pdf_path))
-                else:
-                    full_texts.append(paper.get("abstract", ""))
+                prepared_paper, text = evidence.prepare_review(paper)
+                prepared.append(prepared_paper)
+                full_texts.append(text)
             self.app.call_from_thread(
                 self._set_step, 1, "done", f"{len(full_texts)} papers"
             )
@@ -131,7 +130,7 @@ class ReportRunningScreen(Screen):
                 self._set_step, 2, "active", f"0/{len(to_deep)}"
             )
             reviewed = deep_reviewer.review_papers(
-                to_deep,
+                prepared,
                 full_texts,
                 api_base,
                 api_key,
@@ -149,17 +148,23 @@ class ReportRunningScreen(Screen):
                 reviewed, api_base, api_key, model
             )
             import pyperclip
-            pyperclip.copy(markdown_content)
+            from paper_daily.core.exports import save_export
+            path = save_export(markdown_content, "digest", "md")
+            result = f"Report saved: {path}"
+            try:
+                pyperclip.copy(markdown_content)
+                result += "; copied to clipboard."
+            except pyperclip.PyperclipException:
+                result += "; clipboard unavailable."
             self.app.call_from_thread(
-                self._set_step, 3, "done", "Copied to clipboard"
+                self._set_step, 3, "done", result
             )
 
-            self.app.call_from_thread(self.dismiss, "clipboard")
+            self.app.call_from_thread(self.dismiss, result)
         except Exception as exc:
             self.app.call_from_thread(
                 self._show_error, f"Report failed: {exc}"
             )
-            self.app.call_from_thread(self.dismiss, None)
 
     def _show_error(self, msg: str) -> None:
         self.query_one("#error-msg", Static).update(

@@ -8,9 +8,11 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
+from paper_daily.core.identifiers import deduplicate_papers, normalize_arxiv_id
+
 
 _ARXIV_API = "https://export.arxiv.org/api/query"
-_NS = {"atom": "http://www.w3.org/2005/Atom"}
+_NS = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}
 _RATE_LIMIT_SECONDS = 3.0
 _MAX_RESULTS_PER_QUERY = 200
 _MAX_RECALL = 50
@@ -68,12 +70,7 @@ def search(keywords: list[str], time_window_days: int = 1) -> list[dict]:
         start += _MAX_RESULTS_PER_QUERY
         time.sleep(_RATE_LIMIT_SECONDS)
 
-    seen = set()
-    unique = []
-    for p in papers:
-        if p["arxiv_id"] not in seen:
-            seen.add(p["arxiv_id"])
-            unique.append(p)
+    unique = deduplicate_papers(papers)
 
     unique.sort(key=lambda p: (-_pub_ts(p), p["title"]))
     return unique[:_MAX_RECALL]
@@ -105,13 +102,42 @@ def _parse_entry(entry: ET.Element) -> dict | None:
         if name is not None and name.text:
             authors.append(name.text.strip())
 
-    arxiv_id = id_elem.text.strip().split("/abs/")[-1]
+    if not all(element.text for element in (id_elem, title_elem, summary_elem, published_elem)):
+        return None
+    try:
+        identity = normalize_arxiv_id(id_elem.text)
+    except ValueError:
+        return None
 
-    return {
-        "arxiv_id": arxiv_id,
+    paper = {
+        "arxiv_id": identity.identifier,
         "title": " ".join(title_elem.text.strip().split()),
         "abstract": " ".join(summary_elem.text.strip().split()),
         "authors": authors,
         "published": published_elem.text.strip(),
-        "url": f"https://arxiv.org/abs/{arxiv_id}",
+        "url": identity.url,
+        "metadata_source": "arxiv_api",
     }
+    for field, tag in (("updated", "atom:updated"), ("doi", "arxiv:doi"),
+                       ("journal_ref", "arxiv:journal_ref")):
+        value = entry.findtext(tag, default="", namespaces=_NS).strip()
+        if value:
+            paper[field] = value
+    category = entry.find("arxiv:primary_category", _NS)
+    if category is not None and category.get("term"):
+        paper["primary_category"] = category.get("term")
+    return paper
+
+
+def fetch_by_id(identifier: str) -> dict:
+    identity = normalize_arxiv_id(identifier)
+    response = httpx.get(_ARXIV_API, params={"id_list": identity.identifier},
+                         timeout=30.0, follow_redirects=True)
+    response.raise_for_status()
+    for entry in ET.fromstring(response.text).findall("atom:entry", _NS):
+        paper = _parse_entry(entry)
+        if paper is not None:
+            found = normalize_arxiv_id(paper["arxiv_id"])
+            if found.base == identity.base and (identity.version is None or found.version == identity.version):
+                return paper
+    raise ValueError("arXiv returned no matching paper/version")

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Synthetic metadata, not claims about the actual papers with these IDs. -->
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <entry>
+    <id>http://arxiv.org/abs/2401.00001v1</id>
+    <title>Synthetic old version</title><summary>Synthetic abstract.</summary>
+    <published>2024-01-01T00:00:00Z</published><updated>2024-01-01T00:00:00Z</updated>
+    <author><name>Example Author</name></author>
+  </entry>
+  <entry>
+    <id>https://arxiv.org/abs/2401.00001v2</id>
+    <title>Synthetic revised version &amp; methods</title><summary>Revised synthetic abstract.</summary>
+    <published>2024-01-01T00:00:00Z</published><updated>2024-01-02T00:00:00Z</updated>
+    <author><name>Example Author</name></author>
+    <arxiv:doi>10.0000/synthetic_fixture</arxiv:doi>
+    <arxiv:journal_ref>Synthetic journal reference</arxiv:journal_ref>
+    <arxiv:primary_category term="cs.AI"/>
+  </entry>
+</feed>

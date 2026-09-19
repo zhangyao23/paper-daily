@@ -19,6 +19,20 @@ dependencies = [
 [project.scripts]
 paper-daily = "paper_daily.cli:app"
 
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24", "ruff>=0.9", "bibtexparser>=1.4,<2"]
+
+[dependency-groups]
+demo = ["pillow>=10", "playwright>=1.49"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--basetemp=.test-tmp"
+asyncio_mode = "auto"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

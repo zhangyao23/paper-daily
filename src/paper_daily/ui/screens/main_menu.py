@@ -8,7 +8,6 @@ from textual.screen import Screen
 from textual.widgets import ContentSwitcher, Input, OptionList, Static
 from textual.widgets.option_list import Option
 
-from paper_daily import __version__
 from paper_daily.ui.screens.settings import SettingsPanel, TAB_NAMES
 from paper_daily.ui.widgets import Banner
 
@@ -44,6 +43,7 @@ _KEYWORD_HINTS = [
     ("space", "Toggle"),
     ("enter", "Fetch"),
     ("s", "Settings"),
+    ("l", "Reading list"),
     ("q", "Quit"),
 ]
 _SETTINGS_HINTS = [
@@ -63,6 +63,7 @@ class MainMenuScreen(Screen):
             priority=True, show=False,
         ),
         Binding("s", "settings", "Settings", priority=True, show=False),
+        Binding("l", "library", "Reading list", priority=True, show=False),
         Binding("q", "quit_app", "Quit", priority=True, show=False),
         Binding("escape", "handle_escape", "", priority=True, show=False),
         Binding("left", "prev_tab", "", priority=True, show=False),
@@ -84,7 +85,7 @@ class MainMenuScreen(Screen):
         if action in ("confirm", "toggle_selection"):
             if self._mode == "settings" or self._awaiting_custom:
                 return None
-        if action in ("settings", "quit_app"):
+        if action in ("settings", "quit_app", "library"):
             if self._awaiting_custom:
                 return None
         if action == "handle_escape":
@@ -241,6 +242,10 @@ class MainMenuScreen(Screen):
         if self._mode == "settings":
             return
         self._switch_to_settings()
+
+    def action_library(self) -> None:
+        from paper_daily.ui.screens.library import LibraryScreen
+        self.app.push_screen(LibraryScreen())
 
     def action_quit_app(self) -> None:
         self.app.exit()

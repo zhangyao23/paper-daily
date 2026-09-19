@@ -5,6 +5,7 @@ from collections.abc import Callable
 
 from paper_daily.core import llm
 from paper_daily.prompts.deep_review import build_deep_review_prompt
+from paper_daily.pipeline.evidence import MAX_TEXT_CHARS
 
 
 def review_paper(
@@ -16,11 +17,20 @@ def review_paper(
     on_progress: Callable[[int, int], None] | None = None,
 ) -> dict:
     paper_id = paper.get("arxiv_id", "")
-    messages = build_deep_review_prompt(paper_id, full_text)
+    evidence = dict(paper.get("analysis_evidence") or {"source": "unknown"})
+    if len(full_text) > MAX_TEXT_CHARS:
+        evidence.update(truncated=True, original_chars=len(full_text), used_chars=MAX_TEXT_CHARS)
+    if not full_text.strip():
+        return {**paper, "analysis_evidence": evidence, "deep_review": {},
+                "review_error": "No usable source text; review skipped"}
+    messages = build_deep_review_prompt(paper_id, full_text, evidence)
     raw = llm.chat(api_base, api_key, model, messages, temperature=0.1)
     parsed = _parse_json(raw)
     paper_copy = dict(paper)
     paper_copy["deep_review"] = parsed if parsed else {}
+    paper_copy["analysis_evidence"] = evidence
+    if parsed is None:
+        paper_copy["review_error"] = "LLM did not return a valid JSON object"
     return paper_copy
 
 
@@ -34,6 +44,8 @@ def review_papers(
 ) -> list[dict]:
     results = []
     total = len(papers)
+    if len(papers) != len(full_texts):
+        raise ValueError("Each paper requires exactly one text input")
     for i, (paper, text) in enumerate(zip(papers, full_texts)):
         result = review_paper(
             paper, text, api_base, api_key, model, on_progress
@@ -56,6 +68,7 @@ def _parse_json(raw: str) -> dict | None:
     if start != -1 and end > start:
         raw = raw[start:end]
     try:
-        return json.loads(raw)
+        parsed = json.loads(raw)
+        return parsed if isinstance(parsed, dict) else None
     except json.JSONDecodeError:
         return None

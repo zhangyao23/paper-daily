@@ -38,6 +38,7 @@ def score_papers(
             dim_scores = parsed.get(j, {})
             paper_copy["dim_scores"] = dim_scores
             paper_copy["score"] = _compute_weighted(dim_scores)
+            paper_copy["score_evidence"] = {"source": "abstract", "truncated": False}
             scored.append(paper_copy)
 
         done += len(batch)

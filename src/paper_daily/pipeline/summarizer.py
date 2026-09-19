@@ -24,6 +24,7 @@ def summarize_papers(
         summary = llm.chat(api_base, api_key, model, messages)
         paper_copy = dict(paper)
         paper_copy["summary"] = summary.strip()
+        paper_copy["summary_evidence"] = {"source": "abstract", "truncated": False}
         results.append(paper_copy)
 
         if on_progress:
