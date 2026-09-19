@@ -4,6 +4,14 @@
 
 ## 本次发布授权（2026-09-20）
 
+### 发布后的贡献展示调整
+
+- 功能与演示已通过 `4275bdfc62ee847ab29b7209839d883ffc690215` 推送至 `myfork/main`，已核验远端 SHA 一致。
+- 用户随后希望突出“主贡献”。本次仅调整 README、中文贡献说明与本状态文件，沿用同一 fork 的发布范围。
+- 对外明确写为：Yao Zhang 是 fork 维护者，以及 research-library and analysis extensions 的 primary contributor；Jiaming Lin 为 original upstream application 作者。主页首屏、贡献表和末尾署名均对应此范围。
+- GitHub API 核实 `4275bdf` 的 author/committer 都关联 `zhangyao23`；保留上游 LICENSE 和原提交历史，不改作者、不改写 Git 历史。
+- 仅文档调整，核验 Markdown 本地链接、提交证据与 diff；既有功能测试结果仍见下文。
+
 用户在本地版本与新版操作演示交付后明确要求「帮助我 gitpush 上去」，授权提交并推送下列 36 个已审计文件到自己的 `zhangyao23/paper-daily`，目标为 `myfork/main`；不向上游推送，不创建 PR，不强制推送。下文“未提交/未推送”描述的是此前本地交付阶段，不再表示当前禁止执行本次已授权操作。
 
 发布前实时核验：fork 默认分支为 main，远端 SHA 为 `5b10d5891069f1957e1fb44cc6203c5e62d33416`，与本地提交起点一致；51 项测试与 Ruff 再次通过。提交 SHA 与远端校验结果以 Git 历史和发布后的只读核验为准，本地执行回执保存在忽略目录 `.local-audit/publish-result.json`。本次未包括 `config.py`，其内容仍与原 HEAD 一致。

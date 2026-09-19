@@ -2,6 +2,10 @@
 
 本文件按可核验 Git 历史和本轮实际代码区分贡献，不把 fork 写成独立开发整个项目。
 
+**张耀（Yao Zhang / @zhangyao23）是此 fork 的维护者，以及文献管理与分析扩展的主贡献者。** 林佳明（Jiaming Lin）是上游原始项目的作者。README 首页与末尾均以这一范围展示双方贡献。
+
+公开证据：[历史 PDF 分析与报告扩展 90a1299](https://github.com/zhangyao23/paper-daily/commit/90a1299)、[文献管理、来源标注、测试与演示 4275bdf](https://github.com/zhangyao23/paper-daily/commit/4275bdfc62ee847ab29b7209839d883ffc690215)。已通过 GitHub API 核实后一提交的 author 和 committer 均关联 `zhangyao23`，不是 Lin5412。
+
 ## 归属边界
 
 | 层次 | 事实与证据 | 合理表述 |

@@ -5,15 +5,28 @@
 
 A terminal arXiv digest with **version-aware deduplication, deterministic BibTeX export, a local reading list, and explicit analysis provenance**.
 
-This is [Yao Zhang's fork](https://github.com/zhangyao23/paper-daily) of [Paper Daily by Jiaming Lin](https://github.com/Lin5412/paper-daily). It extends the existing Textual application; the original application, ranking system, and UI are not claimed as independently developed here. The original MIT copyright notice remains unchanged in [LICENSE](LICENSE).
+**Fork maintainer: [Yao Zhang (@zhangyao23)](https://github.com/zhangyao23)**
 
-## What comes from where?
+**Primary contributor to this fork's research-library and analysis extensions.**
 
-| Layer | Implemented functionality | Evidence |
+This fork builds on [Jiaming Lin's original Paper Daily](https://github.com/Lin5412/paper-daily), extending its arXiv digest into a workflow for reviewing, organizing, and citing papers.
+
+## Yao Zhang's contributions
+
+- **Paper analysis and reporting:** PDF download/text extraction, deep-review and Markdown report pipelines, and clipboard integration.
+- **Literature management:** version-aware arXiv deduplication, deterministic BibTeX export, a local reading list, and persistent read/star state with JSON import/export.
+- **Evidence transparency:** explicit abstract/PDF source labels, visible fallback and truncation, and a code-generated evidence manifest in saved reports.
+- **Integration and verification:** Textual/CLI controls, 51 offline regression tests, and a reproducible 13-step workflow demonstration.
+
+**Review the work:** [earlier analysis/report extension](https://github.com/zhangyao23/paper-daily/commit/90a1299) · [library, provenance, tests, and demo](https://github.com/zhangyao23/paper-daily/commit/4275bdfc62ee847ab29b7209839d883ffc690215) · [Yao's commit history](https://github.com/zhangyao23/paper-daily/commits/main/?author=zhangyao23). The current extensions were developed with AI-assisted tooling; implementation and verification details are documented in [the contribution notes](CONTRIBUTIONS.zh-CN.md).
+
+## Contributors and project history
+
+| Contributor / scope | Implemented functionality | Evidence |
 | --- | --- | --- |
-| Upstream | arXiv keyword search; 16 presets/custom keywords; business-day lookback; weighted seven-dimension LLM ranking; abstract summaries; provider setup/settings; activity calendar | Upstream history through [f69b555](https://github.com/Lin5412/paper-daily/commit/f69b555) |
-| Earlier fork extension | Copy results; download/cache PDFs; extract text with PyMuPDF; deep-review prompt/pipeline; LLM-formatted Markdown report copied to clipboard | [90a1299](https://github.com/zhangyao23/paper-daily/commit/90a1299), followed by [5b10d58](https://github.com/zhangyao23/paper-daily/commit/5b10d58) |
-| Current extension | ID normalization/version merging; metadata-only BibTeX; JSON reading list; UI/CLI import/export; source/fallback/truncation labels; saved Markdown reports; offline and terminal-interaction tests | Current source, [tests](tests), [Chinese contribution notes](CONTRIBUTIONS.zh-CN.md) |
+| **Yao Zhang — current library extensions** | ID normalization/version merging; metadata-only BibTeX; JSON reading list; UI/CLI import/export; source/fallback/truncation labels; saved Markdown reports; offline and terminal-interaction tests; current demo | [4275bdf](https://github.com/zhangyao23/paper-daily/commit/4275bdfc62ee847ab29b7209839d883ffc690215), [tests](tests) |
+| **Yao Zhang — earlier analysis extensions** | Copy results; download/cache PDFs; extract text with PyMuPDF; deep-review prompt/pipeline; LLM-formatted Markdown report copied to clipboard | [90a1299](https://github.com/zhangyao23/paper-daily/commit/90a1299), followed by [5b10d58](https://github.com/zhangyao23/paper-daily/commit/5b10d58) |
+| **Jiaming Lin — original upstream application** | arXiv keyword search; 16 presets/custom keywords; business-day lookback; weighted seven-dimension LLM ranking; abstract summaries; original Textual UI, provider setup/settings, and activity calendar | Upstream history through [f69b555](https://github.com/Lin5412/paper-daily/commit/f69b555) |
 
 The activity calendar records digest sessions. Explicit **read/unread** state is tracked separately in the new reading list.
 
@@ -198,4 +211,7 @@ See [TASK_STATE.md](TASK_STATE.md) for exact checks and publication files. No re
 
 ## License and attribution
 
-Application source retains the original [MIT license](LICENSE), copyright Jiaming Lin, and upstream links. Dependencies retain their own licenses; consult [PyMuPDF's licensing](https://pymupdf.readthedocs.io/en/latest/about.html#license-and-copyright) when redistributing or embedding PDF functionality. This repository's MIT notice does not relicense dependencies.
+- **Yao Zhang:** fork maintainer and primary contributor to the research-library and analysis extensions described above.
+- **Jiaming Lin:** author of the original upstream application. The original copyright notice and [MIT license](LICENSE) are preserved.
+
+Dependencies retain their own licenses; consult [PyMuPDF's licensing](https://pymupdf.readthedocs.io/en/latest/about.html#license-and-copyright) when redistributing or embedding PDF functionality. This repository's MIT notice does not relicense dependencies.
